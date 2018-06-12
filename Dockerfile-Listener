@@ -1,0 +1,28 @@
+FROM golang:1.10-alpine
+
+ENV WORKDIR /go/src/sirius
+ENV GOPATH /go
+
+RUN apk update; apk add curl; apk add git
+
+WORKDIR $WORKDIR
+
+RUN go get -u github.com/julienschmidt/httprouter
+RUN go get -u github.com/vadimi/go-http-ntlm
+RUN go get -u github.com/spf13/viper
+RUN go get -u github.com/streadway/amqp
+
+# Copy the local package files to the container's workspace.
+#ADD . .
+COPY ./config ./config
+COPY ./listener ./listener
+COPY ./models ./models
+COPY ./utils ./utils
+
+RUN ls -lt
+
+WORKDIR $WORKDIR/listener
+RUN go build server.go
+RUN ls -lt
+
+CMD ["./server"]

@@ -1,0 +1,116 @@
+version: '2'
+services:
+  rabitmq:
+    image: rabbitmq:3-management
+    hostname: sirius-rabbit
+    environment: 
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+    restart: unless-stopped
+  hookentry:
+    build:
+      context: .
+      dockerfile: Dockerfile-Ngnix
+    image: rchaganti/sirius-webhook-entry:$DOCKER_TAG
+    depends_on:
+      - rabitmq
+      - webhook
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+  webhook:
+    build:
+      context: .
+      dockerfile: Dockerfile-Listener
+    image: rchaganti/sirius-webhook:$DOCKER_TAG
+    depends_on:
+      - rabitmq
+    environment: 
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_HOST: ${RABBITMQ_HOST}
+    restart: unless-stopped
+  reciever-jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile-Reciever
+    image: rchaganti/sirius-reciever:$DOCKER_TAG
+    depends_on:
+      - rabitmq
+    environment: 
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_DEFAULT_RECIEVE_QUEUE: "jenkins"
+      JENKINS_API_HOST: "10.71.2.181:8083"
+    restart: unless-stopped
+  reciever-jenkins-stg:
+    build:
+      context: .
+      dockerfile: Dockerfile-Reciever
+    image: rchaganti/sirius-reciever:$DOCKER_TAG
+    depends_on:
+      - rabitmq
+    environment: 
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_DEFAULT_RECIEVE_QUEUE: "jenkins-stg"
+      JENKINS_API_HOST: "10.71.2.181:8083"
+      ENV: "STG"
+    restart: unless-stopped
+  reciever-jenkins-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile-Reciever
+    image: rchaganti/sirius-reciever:$DOCKER_TAG
+    depends_on:
+      - rabitmq
+    environment: 
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_DEFAULT_RECIEVE_QUEUE: "jenkins-prod"
+      JENKINS_API_HOST: "10.71.2.181:8083"
+      ENV: "PRD"
+  reciever-tfs:
+    build:
+      context: .
+      dockerfile: Dockerfile-Reciever
+    image: rchaganti/sirius-reciever:$DOCKER_TAG
+    depends_on:
+      - rabitmq
+    environment: 
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_DEFAULT_RECIEVE_QUEUE: "tfs"
+    restart: unless-stopped
+  reciever-tfs-stg:
+    build:
+      context: .
+      dockerfile: Dockerfile-Reciever
+    image: rchaganti/sirius-reciever:$DOCKER_TAG
+    depends_on:
+      - rabitmq
+    environment: 
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_DEFAULT_RECIEVE_QUEUE: "tfs-stg"
+      ENV: "STG"
+    restart: unless-stopped
+  reciever-tfs-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile-Reciever
+    image: rchaganti/sirius-reciever:$DOCKER_TAG
+    depends_on:
+      - rabitmq
+    environment: 
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_DEFAULT_RECIEVE_QUEUE: "tfs-prod"
+      ENV: "PRD"
+    restart: unless-stopped
