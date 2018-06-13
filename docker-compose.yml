@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
   webhook:
     build:
-      context: .
+      context: 
       dockerfile: Dockerfile-Listener
     image: rchaganti/sirius-webhook:$DOCKER_TAG
     depends_on:
