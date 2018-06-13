@@ -9,7 +9,7 @@ services:
     restart: unless-stopped
   hookentry:
     build:
-      context: .
+      context: 
       dockerfile: Dockerfile-Ngnix
     image: rchaganti/sirius-webhook-entry:$DOCKER_TAG
     depends_on:
